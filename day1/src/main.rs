@@ -24,7 +24,9 @@ fn part_one(mut left: Vec<usize>, mut right: Vec<usize>) -> usize {
     left.sort();
     right.sort();
 
-    (0..left.len()).map(|i| left[i].abs_diff(right[i])).sum()
+    left.iter()
+        .zip(right.iter())
+        .fold(0, |acc, (l, r)| acc + l.abs_diff(*r))
 }
 
 fn part_two(left: Vec<usize>, right: Vec<usize>) -> usize {
