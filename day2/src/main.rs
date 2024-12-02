@@ -77,7 +77,6 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let input = parse(DATA);
         assert_eq!(252, part_one(&parse(DATA)));
     }
 
