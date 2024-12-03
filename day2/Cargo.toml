@@ -7,5 +7,4 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
-itertools = "0.13"
 took = "0.1"

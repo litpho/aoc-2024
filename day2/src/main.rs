@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 const DATA: &str = include_str!("input.txt");
 
 fn main() {
@@ -30,7 +28,8 @@ fn is_safe(report: &[usize]) -> bool {
     }
 
     let inc = report[0] < report[1];
-    report.iter().tuple_windows::<(_, _)>().all(|(a, b)| {
+    report.windows(2).all(|x| {
+        let (a, b) = (x[0], x[1]);
         if inc {
             b > a && b - a <= 3
         } else {
