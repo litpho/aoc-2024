@@ -1,3 +1,13 @@
+use nom::{
+    branch::alt,
+    bytes::complete::tag,
+    character::complete::{self, anychar},
+    combinator::map,
+    multi::{many0, many1, many_till},
+    sequence::{delimited, separated_pair, terminated},
+    IResult,
+};
+
 const DATA: &str = include_str!("input.txt");
 
 fn main() {
@@ -9,11 +19,27 @@ fn main() {
     println!("Result part one: {result}");
     println!("Time spent: {took}");
 
+    let (took, result) = took::took(|| parse_nom(DATA));
+    println!("Time spent parsing: {took}");
+    let (_, input) = result.unwrap();
+
+    let (took, result) = took::took(|| part_one_nom(&input));
+    println!("Result part one nom: {result}");
+    println!("Time spent: {took}");
+
     let (took, result) = took::took(|| parse_input(DATA, true));
     println!("Time spent parsing: {took}");
     let input = result;
 
     let (took, result) = took::took(|| solve(&input));
+    println!("Result part two: {result}");
+    println!("Time spent: {took}");
+
+    let (took, result) = took::took(|| parse_nom(DATA));
+    println!("Time spent parsing: {took}");
+    let (_, input) = result.unwrap();
+
+    let (took, result) = took::took(|| part_two_nom(&input));
     println!("Result part two: {result}");
     println!("Time spent: {took}");
 }
@@ -68,6 +94,72 @@ fn parse_input(input: &'static str, has_ignore: bool) -> Vec<Mul> {
     vec
 }
 
+#[derive(Debug)]
+enum Instr {
+    Mul(Mul),
+    Do,
+    Dont,
+}
+
+fn part_one_nom(input: &[Instr]) -> u32 {
+    input
+        .iter()
+        .filter_map(|m| match m {
+            Instr::Mul(m) => Some(m.a * m.b),
+            Instr::Do => None,
+            Instr::Dont => None,
+        })
+        .sum()
+}
+
+fn part_two_nom(input: &[Instr]) -> u32 {
+    let mut result = 0;
+    let mut ignore = false;
+    for instr in input {
+        match instr {
+            Instr::Mul(mul) => {
+                if !ignore {
+                    result += mul.a * mul.b
+                }
+            }
+            Instr::Do => ignore = false,
+            Instr::Dont => ignore = true,
+        }
+    }
+
+    result
+}
+
+fn parse_nom(input: &'static str) -> IResult<&str, Vec<Instr>> {
+    terminated(many1(parse_instr), many0(anychar))(input)
+}
+
+fn parse_instr(input: &'static str) -> IResult<&str, Instr> {
+    map(
+        many_till(anychar, alt((parse_do, parse_dont, parse_mul))),
+        |(_, instr)| instr,
+    )(input)
+}
+
+fn parse_do(input: &'static str) -> IResult<&str, Instr> {
+    map(tag("do()"), |_| Instr::Do)(input)
+}
+
+fn parse_dont(input: &'static str) -> IResult<&str, Instr> {
+    map(tag("don't()"), |_| Instr::Dont)(input)
+}
+
+fn parse_mul(input: &'static str) -> IResult<&str, Instr> {
+    map(
+        delimited(
+            tag("mul("),
+            separated_pair(complete::u32, tag(","), complete::u32),
+            tag(")"),
+        ),
+        |(a, b)| Instr::Mul(Mul { a, b }),
+    )(input)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -86,6 +178,16 @@ mod tests {
     }
 
     #[test]
+    fn test_part_one_testdata_nom() {
+        assert_eq!(161, part_one_nom(&parse_nom(TESTDATA).unwrap().1));
+    }
+
+    #[test]
+    fn test_part_one_nom() {
+        assert_eq!(170778545, part_one_nom(&parse_nom(DATA).unwrap().1));
+    }
+
+    #[test]
     fn test_part_two_testdata() {
         assert_eq!(48, solve(&parse_input(TESTDATA2, true)));
     }
@@ -93,5 +195,15 @@ mod tests {
     #[test]
     fn test_part_two() {
         assert_eq!(82868252, solve(&parse_input(DATA, true)));
+    }
+
+    #[test]
+    fn test_part_two_testdata_nom() {
+        assert_eq!(48, part_two_nom(&parse_nom(TESTDATA2).unwrap().1));
+    }
+
+    #[test]
+    fn test_part_two_nom() {
+        assert_eq!(82868252, part_two_nom(&parse_nom(DATA).unwrap().1));
     }
 }
