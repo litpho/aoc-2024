@@ -8,7 +8,7 @@ fn main() {
     let input = result;
 
     let (took, result) = took::took(|| part_one(&input));
-    println!("Result part one: {result}");
+    println!("Result part one (2): {result}");
     println!("Time spent: {took}");
 
     let (took, result) = took::took(|| parse(DATA));
@@ -28,38 +28,41 @@ fn part_one(input: &HashMap<(isize, isize), Letter>) -> usize {
         .sum()
 }
 
-fn solve_xmas(input: &HashMap<(isize, isize), Letter>, x: isize, y: isize) -> usize {
-    let mut result = 0;
-
-    // top
-    result += solve_xmas_dir(input, x, y, &[(0, -1), (0, -2), (0, -3)]);
-    // top right
-    result += solve_xmas_dir(input, x, y, &[(1, -1), (2, -2), (3, -3)]);
+const ONE_DIRECTIONS: [(isize, isize); 8] = [
+    // up
+    (0, -1),
+    // up right
+    (1, -1),
     // right
-    result += solve_xmas_dir(input, x, y, &[(1, 0), (2, 0), (3, 0)]);
+    (1, 0),
     // down right
-    result += solve_xmas_dir(input, x, y, &[(1, 1), (2, 2), (3, 3)]);
+    (1, 1),
     // down
-    result += solve_xmas_dir(input, x, y, &[(0, 1), (0, 2), (0, 3)]);
+    (0, 1),
     // down left
-    result += solve_xmas_dir(input, x, y, &[(-1, 1), (-2, 2), (-3, 3)]);
+    (-1, 1),
     // left
-    result += solve_xmas_dir(input, x, y, &[(-1, 0), (-2, 0), (-3, 0)]);
-    // top left
-    result += solve_xmas_dir(input, x, y, &[(-1, -1), (-2, -2), (-3, -3)]);
+    (-1, 0),
+    // up left
+    (-1, -1),
+];
 
-    result
+fn solve_xmas(input: &HashMap<(isize, isize), Letter>, x: isize, y: isize) -> usize {
+    ONE_DIRECTIONS
+        .iter()
+        .map(|matrix| solve_xmas_dir(input, x, y, matrix))
+        .sum()
 }
 
 fn solve_xmas_dir(
     input: &HashMap<(isize, isize), Letter>,
     x: isize,
     y: isize,
-    matrix: &[(isize, isize); 3],
+    matrix: &(isize, isize),
 ) -> usize {
-    if let Some(Letter::M) = input.get(&(x + matrix[0].0, y + matrix[0].1)) {
-        if let Some(Letter::A) = input.get(&(x + matrix[1].0, y + matrix[1].1)) {
-            if let Some(Letter::S) = input.get(&(x + matrix[2].0, y + matrix[2].1)) {
+    if let Some(Letter::M) = input.get(&(x + matrix.0, y + matrix.1)) {
+        if let Some(Letter::A) = input.get(&(x + matrix.0 * 2, y + matrix.1 * 2)) {
+            if let Some(Letter::S) = input.get(&(x + matrix.0 * 3, y + matrix.1 * 3)) {
                 return 1;
             }
         }
@@ -76,17 +79,22 @@ fn part_two(input: &HashMap<(isize, isize), Letter>) -> usize {
         .count()
 }
 
-fn solve_mas(input: &HashMap<(isize, isize), Letter>, x: isize, y: isize) -> bool {
-    let mut result = 0;
-
-    // top right
-    result += solve_mas_dir(input, x, y, (1, -1));
+const TWO_DIRECTIONS: [(isize, isize); 4] = [
+    // up right
+    (1, -1),
     // down right
-    result += solve_mas_dir(input, x, y, (1, 1));
+    (1, 1),
     // down left
-    result += solve_mas_dir(input, x, y, (-1, 1));
-    // top left
-    result += solve_mas_dir(input, x, y, (-1, -1));
+    (-1, 1),
+    // up left
+    (-1, -1),
+];
+
+fn solve_mas(input: &HashMap<(isize, isize), Letter>, x: isize, y: isize) -> bool {
+    let result: usize = TWO_DIRECTIONS
+        .iter()
+        .map(|matrix| solve_mas_dir(input, x, y, matrix))
+        .sum();
 
     result > 1
 }
@@ -95,7 +103,7 @@ fn solve_mas_dir(
     input: &HashMap<(isize, isize), Letter>,
     x: isize,
     y: isize,
-    matrix: (isize, isize),
+    matrix: &(isize, isize),
 ) -> usize {
     if let Some(Letter::M) = input.get(&(x + matrix.0, y + matrix.1)) {
         if let Some(Letter::S) = input.get(&(x - matrix.0, y - matrix.1)) {
