@@ -1,4 +1,5 @@
 use anyhow::Result;
+use rayon::prelude::*;
 use std::collections::HashSet;
 
 const DATA: &str = include_str!("input.txt");
@@ -14,9 +15,9 @@ fn main() -> Result<()> {
 
     let (took, result) = took::took(|| parse_input(DATA));
     println!("Time spent parsing: {took}");
-    let (start, mut grid) = result?;
+    let (start, grid) = result?;
 
-    let (took, result) = took::took(|| part_two(start, &mut grid));
+    let (took, result) = took::took(|| part_two(start, &grid));
     println!("Result part two: {result}");
     println!("Time spent: {took}");
 
@@ -54,35 +55,36 @@ fn step(state: &State, grid: &[Vec<bool>], bounds: (usize, usize)) -> Option<Sta
     }
 }
 
-fn part_two(start: State, grid: &mut [Vec<bool>]) -> usize {
-    let walked_positions = walked_positions(start.clone(), grid);
-    let mut count = 0;
-    let mut last_change = (start.x, start.y);
+fn part_two(start: State, grid: &[Vec<bool>]) -> usize {
+    let walked_positions = walked_positions(start.clone(), grid)
+        .into_iter()
+        .collect::<Vec<(usize, usize)>>();
 
-    'outer: for block in walked_positions {
-        grid[last_change.1][last_change.0] = false;
-        grid[block.1][block.0] = true;
-        last_change = block;
+    walked_positions
+        .par_iter()
+        .map(|block| {
+            let mut new_grid = grid.to_owned();
+            new_grid[block.1][block.0] = true;
 
-        let mut state = start.clone();
-        let bounds = (grid[0].len(), grid.len());
-        let mut set = vec![];
-        while let Some(new_state) = step(&state, grid, bounds) {
-            if new_state.direction != state.direction {
-                if set.contains(&new_state) {
-                    count += 1;
-                    continue 'outer;
+            let mut state = start.clone();
+            let bounds = (new_grid[0].len(), new_grid.len());
+            let mut visited = vec![];
+            while let Some(new_state) = step(&state, &new_grid, bounds) {
+                if new_state.direction != state.direction {
+                    if visited.contains(&new_state) {
+                        return 1;
+                    }
+                    visited.push(new_state.clone());
                 }
-                set.push(new_state.clone());
+                state = new_state;
             }
-            state = new_state;
-        }
-    }
 
-    count
+            0
+        })
+        .sum()
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 struct State {
     x: usize,
     y: usize,
@@ -132,7 +134,7 @@ impl State {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 enum Direction {
     Up,
     Right,
@@ -195,16 +197,16 @@ mod tests {
 
     #[test]
     fn test_part_two_testdata() -> Result<()> {
-        let (start, mut grid) = parse_input(TESTDATA)?;
-        assert_eq!(6, part_two(start, &mut grid));
+        let (start, grid) = parse_input(TESTDATA)?;
+        assert_eq!(6, part_two(start, &grid));
 
         Ok(())
     }
 
     #[test]
     fn test_part_two() -> Result<()> {
-        let (start, mut grid) = parse_input(DATA)?;
-        assert_eq!(1888, part_two(start, &mut grid));
+        let (start, grid) = parse_input(DATA)?;
+        assert_eq!(1888, part_two(start, &grid));
 
         Ok(())
     }
