@@ -1,6 +1,5 @@
 use anyhow::Result;
 use rayon::prelude::*;
-use std::collections::HashSet;
 
 const DATA: &str = include_str!("input.txt");
 
@@ -28,20 +27,22 @@ fn part_one(start: State, grid: &[Vec<bool>]) -> usize {
     walked_positions(start, grid).len()
 }
 
-fn walked_positions(start: State, grid: &[Vec<bool>]) -> HashSet<(usize, usize)> {
+fn walked_positions(start: State, grid: &[Vec<bool>]) -> Vec<(usize, usize)> {
     let mut state = start;
     let bounds = (grid[0].len(), grid.len());
-    let mut set = HashSet::new();
-    set.insert((state.x, state.y));
-    while let Some(new_state) = step(&state, grid, bounds) {
+    let mut set = Vec::new();
+    set.push((state.x, state.y));
+    while let Some(new_state) = step(&state, grid, &bounds) {
         state = new_state;
-        set.insert((state.x, state.y));
+        set.push((state.x, state.y));
     }
 
+    set.sort();
+    set.dedup();
     set
 }
 
-fn step(state: &State, grid: &[Vec<bool>], bounds: (usize, usize)) -> Option<State> {
+fn step(state: &State, grid: &[Vec<bool>], bounds: &(usize, usize)) -> Option<State> {
     match state.make_move(bounds) {
         None => None,
         Some(new_state) => {
@@ -56,20 +57,17 @@ fn step(state: &State, grid: &[Vec<bool>], bounds: (usize, usize)) -> Option<Sta
 }
 
 fn part_two(start: State, grid: &[Vec<bool>]) -> usize {
-    let walked_positions = walked_positions(start.clone(), grid)
-        .into_iter()
-        .collect::<Vec<(usize, usize)>>();
+    let bounds = (grid[0].len(), grid.len());
 
-    walked_positions
+    walked_positions(start.clone(), grid)
         .par_iter()
         .map(|block| {
             let mut new_grid = grid.to_owned();
             new_grid[block.1][block.0] = true;
 
             let mut state = start.clone();
-            let bounds = (new_grid[0].len(), new_grid.len());
             let mut visited = vec![];
-            while let Some(new_state) = step(&state, &new_grid, bounds) {
+            while let Some(new_state) = step(&state, &new_grid, &bounds) {
                 if new_state.direction != state.direction {
                     if visited.contains(&new_state) {
                         return 1;
@@ -100,7 +98,7 @@ impl State {
         Self::new(self.x, self.y, self.direction.turn_right())
     }
 
-    pub fn make_move(&self, bounds: (usize, usize)) -> Option<Self> {
+    pub fn make_move(&self, bounds: &(usize, usize)) -> Option<Self> {
         match self.direction {
             Direction::Up => {
                 if self.y == 0 {
