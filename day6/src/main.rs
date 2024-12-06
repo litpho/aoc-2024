@@ -62,12 +62,9 @@ fn part_two(start: State, grid: &[Vec<bool>]) -> usize {
     walked_positions(start.clone(), grid)
         .par_iter()
         .map(|block| {
-            let mut new_grid = grid.to_owned();
-            new_grid[block.1][block.0] = true;
-
             let mut state = start.clone();
             let mut visited = vec![];
-            while let Some(new_state) = step(&state, &new_grid, &bounds) {
+            while let Some(new_state) = step_block(&state, grid, &bounds, block) {
                 if new_state.direction != state.direction {
                     if visited.contains(&new_state) {
                         return 1;
@@ -80,6 +77,25 @@ fn part_two(start: State, grid: &[Vec<bool>]) -> usize {
             0
         })
         .sum()
+}
+
+fn step_block(
+    state: &State,
+    grid: &[Vec<bool>],
+    bounds: &(usize, usize),
+    block: &(usize, usize),
+) -> Option<State> {
+    match state.make_move(bounds) {
+        None => None,
+        Some(new_state) => {
+            if block == &(new_state.x, new_state.y) || grid[new_state.y][new_state.x] {
+                let right_state = state.turn_right();
+                Some(right_state)
+            } else {
+                Some(new_state)
+            }
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
