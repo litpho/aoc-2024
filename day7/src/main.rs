@@ -30,52 +30,34 @@ fn main() -> Result<()> {
 }
 
 fn part_one(input: &[(u64, Vec<u64>)]) -> u64 {
-    input
-        .iter()
-        .filter(|(goal, factors)| solveable_one(goal, factors))
-        .map(|(goal, _)| goal)
-        .sum()
-}
-
-fn solveable_one(goal: &u64, factors: &[u64]) -> bool {
-    solve_internally_one(goal, factors, 0, Operator::Add)
-        || solve_internally_one(goal, factors, 1, Operator::Multiply)
-}
-
-fn solve_internally_one(goal: &u64, factors: &[u64], subtotal: u64, operator: Operator) -> bool {
-    let new_subtotal = match operator {
-        Operator::Add => subtotal + factors[0],
-        Operator::Multiply => subtotal * factors[0],
-        _ => panic!("Unexpected operator"),
-    };
-
-    if subtotal > *goal {
-        return false;
-    }
-
-    if factors.len() == 1 {
-        return new_subtotal == *goal;
-    }
-
-    solve_internally_one(goal, &factors[1..], new_subtotal, Operator::Add)
-        || solve_internally_one(goal, &factors[1..], new_subtotal, Operator::Multiply)
+    solve(input, false)
 }
 
 fn part_two(input: &[(u64, Vec<u64>)]) -> u64 {
+    solve(input, true)
+}
+
+fn solve(input: &[(u64, Vec<u64>)], part2: bool) -> u64 {
     input
         .iter()
-        .filter(|(goal, factors)| solveable_two(goal, factors))
+        .filter(|(goal, factors)| solveable(goal, factors, part2))
         .map(|(goal, _)| goal)
         .sum()
 }
 
-fn solveable_two(goal: &u64, factors: &[u64]) -> bool {
-    solve_internally_two(goal, factors, 0, Operator::Add)
-        || solve_internally_two(goal, factors, 1, Operator::Multiply)
-        || solve_internally_two(goal, factors, 1, Operator::Concatenate)
+fn solveable(goal: &u64, factors: &[u64], part2: bool) -> bool {
+    solve_internally(goal, factors, 0, Operator::Add, part2)
+        || solve_internally(goal, factors, 1, Operator::Multiply, part2)
+        || part2 && solve_internally(goal, factors, 1, Operator::Concatenate, part2)
 }
 
-fn solve_internally_two(goal: &u64, factors: &[u64], subtotal: u64, operator: Operator) -> bool {
+fn solve_internally(
+    goal: &u64,
+    factors: &[u64],
+    subtotal: u64,
+    operator: Operator,
+    part2: bool,
+) -> bool {
     let new_subtotal = match operator {
         Operator::Add => subtotal + factors[0],
         Operator::Multiply => subtotal * factors[0],
@@ -90,9 +72,16 @@ fn solve_internally_two(goal: &u64, factors: &[u64], subtotal: u64, operator: Op
         return new_subtotal == *goal;
     }
 
-    solve_internally_two(goal, &factors[1..], new_subtotal, Operator::Add)
-        || solve_internally_two(goal, &factors[1..], new_subtotal, Operator::Multiply)
-        || solve_internally_two(goal, &factors[1..], new_subtotal, Operator::Concatenate)
+    solve_internally(goal, &factors[1..], new_subtotal, Operator::Add, part2)
+        || solve_internally(goal, &factors[1..], new_subtotal, Operator::Multiply, part2)
+        || (part2
+            && solve_internally(
+                goal,
+                &factors[1..],
+                new_subtotal,
+                Operator::Concatenate,
+                part2,
+            ))
 }
 
 enum Operator {
