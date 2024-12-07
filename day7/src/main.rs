@@ -79,7 +79,7 @@ fn solve_internally_two(goal: &u64, factors: &[u64], subtotal: u64, operator: Op
     let new_subtotal = match operator {
         Operator::Add => subtotal + factors[0],
         Operator::Multiply => subtotal * factors[0],
-        Operator::Concatenate => format!("{subtotal}{}", factors[0]).parse::<u64>().unwrap(),
+        Operator::Concatenate => subtotal * 10u64.pow(factors[0].ilog10() + 1) + factors[0],
     };
 
     if subtotal > *goal {
@@ -124,13 +124,6 @@ mod tests {
     use super::*;
 
     const TESTDATA: &str = include_str!("test.txt");
-
-    // #[test]
-    // fn test_solveable() -> Result<()> {
-    //     assert!(solveable(&3267, &[81, 40, 27]));
-    //
-    //     Ok(())
-    // }
 
     #[test]
     fn test_part_one_testdata() -> Result<()> {
