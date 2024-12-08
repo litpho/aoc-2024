@@ -1,14 +1,13 @@
 use anyhow::Result;
 use itertools::Itertools;
-use nom::character::complete::one_of;
 use nom::{
     branch::alt,
-    character::complete::{self, line_ending},
+    character::complete::{self, line_ending, one_of},
     combinator::{map, value},
     multi::{many1, separated_list1},
     IResult,
 };
-use std::collections::HashMap;
+use std::{collections::hash_map::Values, collections::HashMap};
 
 const DATA: &str = include_str!("input.txt");
 
@@ -32,48 +31,58 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn part_one(input: &[Vec<Option<char>>]) -> usize {
-    let bounds = (input[0].len(), input.len());
-    let mut map: HashMap<char, Vec<(usize, usize)>> = HashMap::new();
-    input.iter().enumerate().for_each(|(y, row)| {
-        row.iter()
-            .enumerate()
-            .filter_map(|(x, c)| {
-                if c.is_some() {
-                    Some((x, c.unwrap()))
-                } else {
-                    None
-                }
-            })
-            .for_each(|(x, c)| map.entry(c).or_default().push((x, y)));
-    });
+fn part_one(grid: &Grid) -> usize {
+    grid.antennae()
+        .flat_map(|antennae| antinodes(antennae, grid.bounds(), false))
+        .unique()
+        .count()
+}
 
-    map.keys()
-        .flat_map(|c| antinodes(c, &map, &bounds))
+fn part_two(grid: &Grid) -> usize {
+    grid.antennae()
+        .flat_map(|antennae| antinodes(antennae, grid.bounds(), true))
         .unique()
         .count()
 }
 
 fn antinodes(
-    key: &char,
-    map: &HashMap<char, Vec<(usize, usize)>>,
+    antennae: &[(usize, usize)],
     bounds: &(usize, usize),
+    part2: bool,
 ) -> Vec<(usize, usize)> {
-    map.get(key)
-        .unwrap()
+    antennae
         .iter()
         .permutations(2)
-        .filter_map(|pair| create_pairs(pair, bounds))
+        .flat_map(|pair| create_pairs(pair, bounds, part2))
         .collect::<Vec<(usize, usize)>>()
 }
 
-fn create_pairs(orig: Vec<&(usize, usize)>, bounds: &(usize, usize)) -> Option<(usize, usize)> {
+fn create_pairs(
+    orig: Vec<&(usize, usize)>,
+    bounds: &(usize, usize),
+    part2: bool,
+) -> Vec<(usize, usize)> {
+    let mut vec = vec![];
     let (x1, y1) = *orig[0];
     let (x2, y2) = *orig[1];
     let x_diff = (x1 as isize) - (x2 as isize);
     let y_diff = (y1 as isize) - (y2 as isize);
 
-    check_pair(x1 as isize + x_diff, y1 as isize + y_diff, bounds)
+    if part2 {
+        let mut count = 0;
+        while let Some(pair) = check_pair(
+            x1 as isize + x_diff * count,
+            y1 as isize + y_diff * count,
+            bounds,
+        ) {
+            vec.push(pair);
+            count += 1;
+        }
+    } else if let Some(pair) = check_pair(x1 as isize + x_diff, y1 as isize + y_diff, bounds) {
+        vec.push(pair);
+    }
+
+    vec
 }
 
 fn check_pair(x: isize, y: isize, bounds: &(usize, usize)) -> Option<(usize, usize)> {
@@ -84,65 +93,41 @@ fn check_pair(x: isize, y: isize, bounds: &(usize, usize)) -> Option<(usize, usi
     }
 }
 
-fn part_two(input: &[Vec<Option<char>>]) -> usize {
-    let bounds = (input[0].len(), input.len());
-    let mut map: HashMap<char, Vec<(usize, usize)>> = HashMap::new();
-    input.iter().enumerate().for_each(|(y, row)| {
-        row.iter()
-            .enumerate()
-            .filter_map(|(x, c)| {
-                if c.is_some() {
-                    Some((x, c.unwrap()))
-                } else {
-                    None
+struct Grid {
+    bounds: (usize, usize),
+    map: HashMap<char, Vec<(usize, usize)>>,
+}
+
+impl Grid {
+    pub fn new(input: Vec<Vec<Option<char>>>) -> Self {
+        let bounds = (input[0].len(), input.len());
+        let mut map: HashMap<char, Vec<(usize, usize)>> = HashMap::new();
+        for (y, row) in input.iter().enumerate() {
+            for (x, cell) in row.iter().enumerate() {
+                if let Some(c) = cell {
+                    map.entry(*c).or_default().push((x, y));
                 }
-            })
-            .for_each(|(x, c)| map.entry(c).or_default().push((x, y)));
-    });
+            }
+        }
 
-    map.keys()
-        .flat_map(|c| antinodes2(c, &map, &bounds))
-        .unique()
-        .count()
-}
-
-fn antinodes2(
-    key: &char,
-    map: &HashMap<char, Vec<(usize, usize)>>,
-    bounds: &(usize, usize),
-) -> Vec<(usize, usize)> {
-    map.get(key)
-        .unwrap()
-        .iter()
-        .permutations(2)
-        .flat_map(|pair| create_pairs2(pair, bounds))
-        .collect::<Vec<(usize, usize)>>()
-}
-
-fn create_pairs2(orig: Vec<&(usize, usize)>, bounds: &(usize, usize)) -> Vec<(usize, usize)> {
-    let mut vec = vec![];
-    let mut count = 0;
-    let (x1, y1) = *orig[0];
-    let (x2, y2) = *orig[1];
-    let x_diff = (x1 as isize) - (x2 as isize);
-    let y_diff = (y1 as isize) - (y2 as isize);
-
-    while let Some(pair) = check_pair(
-        x1 as isize + x_diff * count,
-        y1 as isize + y_diff * count,
-        bounds,
-    ) {
-        vec.push(pair);
-        count += 1;
+        Self { bounds, map }
     }
 
-    vec
+    pub fn antennae(&self) -> Values<char, Vec<(usize, usize)>> {
+        self.map.values()
+    }
+
+    pub fn bounds(&self) -> &(usize, usize) {
+        &self.bounds
+    }
 }
 
-fn parse_input(input: &'static str) -> Result<Vec<Vec<Option<char>>>> {
+fn parse_input(input: &'static str) -> Result<Grid> {
     let (_, input) = parse(input)?;
 
-    Ok(input)
+    let grid = Grid::new(input);
+
+    Ok(grid)
 }
 
 fn parse(input: &str) -> IResult<&str, Vec<Vec<Option<char>>>> {
