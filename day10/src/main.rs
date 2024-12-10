@@ -12,13 +12,13 @@ fn main() -> Result<()> {
     println!("Result part one: {result}");
     println!("Time spent: {took}");
 
-    // let (took, result) = took::took(|| parse_input(DATA));
-    // println!("Time spent parsing: {took}");
-    // let input = result?;
-    //
-    // let (took, result) = took::took(|| part_two(&input));
-    // println!("Result part two: {result}");
-    // println!("Time spent: {took}");
+    let (took, result) = took::took(|| parse_input(DATA));
+    println!("Time spent parsing: {took}");
+    let input = result?;
+
+    let (took, result) = took::took(|| part_two(&input));
+    println!("Result part two: {result}");
+    println!("Time spent: {took}");
 
     Ok(())
 }
@@ -36,15 +36,19 @@ fn part_one(grid: &[Vec<usize>]) -> usize {
 }
 
 fn count_trailhead_score(grid: &[Vec<usize>], x: usize, y: usize) -> usize {
-    println!("Trailheads: {x},{y}");
-    let count = count_trailheads_internal(grid, x, y, vec![], vec![], 0)
+    count_trailheads_internal(grid, x, y, vec![], 0)
         .into_iter()
         .flatten()
+        .flat_map(|v| vec![v.last().unwrap().to_owned()])
         .unique()
-        .count();
+        .count()
+}
 
-    println!("Trailheads: ({x},{y}) - {count}");
-    count
+fn count_trailhead_rating(grid: &[Vec<usize>], x: usize, y: usize) -> usize {
+    count_trailheads_internal(grid, x, y, vec![], 0)
+        .into_iter()
+        .flatten()
+        .count()
 }
 
 fn count_trailheads_internal(
@@ -52,15 +56,15 @@ fn count_trailheads_internal(
     x: usize,
     y: usize,
     visited: Vec<(usize, usize)>,
-    heights: Vec<usize>,
     height: usize,
-) -> Vec<Vec<(usize, usize)>> {
+) -> Vec<Vec<Vec<(usize, usize)>>> {
     if grid[y][x] != height {
         return vec![];
     }
     if height == 9 {
-        // println!("Checking {x},{y} for {visited:?} at height {height} - {heights:?}");
-        return vec![vec![(x, y)]];
+        let mut vec = visited.clone();
+        vec.push((x, y));
+        return vec![vec![vec]];
     }
 
     let bounds = (grid[0].len() - 1, grid.len() - 1);
@@ -70,9 +74,7 @@ fn count_trailheads_internal(
         // up
         let mut vec = visited.clone();
         vec.push((x, y));
-        let mut vec2 = heights.clone();
-        vec2.push(height + 1);
-        count_trailheads_internal(grid, x, y - 1, vec, vec2, height + 1)
+        count_trailheads_internal(grid, x, y - 1, vec, height + 1)
             .into_iter()
             .flatten()
             .for_each(|x| result.push(x));
@@ -81,9 +83,7 @@ fn count_trailheads_internal(
         // right
         let mut vec = visited.clone();
         vec.push((x, y));
-        let mut vec2 = heights.clone();
-        vec2.push(height + 1);
-        count_trailheads_internal(grid, x + 1, y, vec, vec2, height + 1)
+        count_trailheads_internal(grid, x + 1, y, vec, height + 1)
             .into_iter()
             .flatten()
             .for_each(|x| result.push(x));
@@ -92,9 +92,7 @@ fn count_trailheads_internal(
         // down
         let mut vec = visited.clone();
         vec.push((x, y));
-        let mut vec2 = heights.clone();
-        vec2.push(height + 1);
-        count_trailheads_internal(grid, x, y + 1, vec, vec2, height + 1)
+        count_trailheads_internal(grid, x, y + 1, vec, height + 1)
             .into_iter()
             .flatten()
             .for_each(|x| result.push(x));
@@ -103,9 +101,7 @@ fn count_trailheads_internal(
         // left
         let mut vec = visited.clone();
         vec.push((x, y));
-        let mut vec2 = heights.clone();
-        vec2.push(height + 1);
-        count_trailheads_internal(grid, x - 1, y, vec, vec2, height + 1)
+        count_trailheads_internal(grid, x - 1, y, vec, height + 1)
             .into_iter()
             .flatten()
             .for_each(|x| result.push(x));
@@ -114,8 +110,16 @@ fn count_trailheads_internal(
     vec![result]
 }
 
-fn part_two(_input: &[Vec<usize>]) -> usize {
-    unimplemented!()
+fn part_two(grid: &[Vec<usize>]) -> usize {
+    grid.iter()
+        .enumerate()
+        .flat_map(|(y, row)| {
+            row.iter()
+                .enumerate()
+                .filter(|(_, val)| **val == 0)
+                .map(move |(x, _)| count_trailhead_rating(grid, x, y))
+        })
+        .sum()
 }
 
 fn parse_input(input: &'static str) -> Result<Vec<Vec<usize>>> {
@@ -151,17 +155,17 @@ mod tests {
         Ok(())
     }
 
-    // #[test]
-    // fn test_part_two_testdata() -> Result<()> {
-    //     assert_eq!(2858, part_two(parse_input(TESTDATA)?));
-    //
-    //     Ok(())
-    // }
-    //
-    // #[test]
-    // fn test_part_two() -> Result<()> {
-    //     assert_eq!(6448168620520, part_two(parse_input(DATA)?));
-    //
-    //     Ok(())
-    // }
+    #[test]
+    fn test_part_two_testdata() -> Result<()> {
+        assert_eq!(81, part_two(&parse_input(TESTDATA)?));
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_part_two() -> Result<()> {
+        assert_eq!(875, part_two(&parse_input(DATA)?));
+
+        Ok(())
+    }
 }
