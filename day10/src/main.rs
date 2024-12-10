@@ -35,6 +35,18 @@ fn part_one(grid: &[Vec<usize>]) -> usize {
         .sum()
 }
 
+fn part_two(grid: &[Vec<usize>]) -> usize {
+    grid.iter()
+        .enumerate()
+        .flat_map(|(y, row)| {
+            row.iter()
+                .enumerate()
+                .filter(|(_, val)| **val == 0)
+                .map(move |(x, _)| count_trailhead_rating(grid, x, y))
+        })
+        .sum()
+}
+
 fn count_trailhead_score(grid: &[Vec<usize>], x: usize, y: usize) -> usize {
     count_trailheads_internal(grid, x, y, vec![], 0)
         .into_iter()
@@ -108,18 +120,6 @@ fn count_trailheads_internal(
     }
 
     vec![result]
-}
-
-fn part_two(grid: &[Vec<usize>]) -> usize {
-    grid.iter()
-        .enumerate()
-        .flat_map(|(y, row)| {
-            row.iter()
-                .enumerate()
-                .filter(|(_, val)| **val == 0)
-                .map(move |(x, _)| count_trailhead_rating(grid, x, y))
-        })
-        .sum()
 }
 
 fn parse_input(input: &'static str) -> Result<Vec<Vec<usize>>> {

@@ -130,26 +130,26 @@ fn part_two_nom(input: &[Instr]) -> u32 {
     result
 }
 
-fn parse_nom(input: &'static str) -> IResult<&str, Vec<Instr>> {
+fn parse_nom(input: &str) -> IResult<&str, Vec<Instr>> {
     terminated(many1(parse_instr), many0(anychar))(input)
 }
 
-fn parse_instr(input: &'static str) -> IResult<&str, Instr> {
+fn parse_instr(input: &str) -> IResult<&str, Instr> {
     map(
         many_till(anychar, alt((parse_do, parse_dont, parse_mul))),
         |(_, instr)| instr,
     )(input)
 }
 
-fn parse_do(input: &'static str) -> IResult<&str, Instr> {
+fn parse_do(input: &str) -> IResult<&str, Instr> {
     map(tag("do()"), |_| Instr::Do)(input)
 }
 
-fn parse_dont(input: &'static str) -> IResult<&str, Instr> {
+fn parse_dont(input: &str) -> IResult<&str, Instr> {
     map(tag("don't()"), |_| Instr::Dont)(input)
 }
 
-fn parse_mul(input: &'static str) -> IResult<&str, Instr> {
+fn parse_mul(input: &str) -> IResult<&str, Instr> {
     map(
         delimited(
             tag("mul("),
