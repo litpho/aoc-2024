@@ -37,7 +37,7 @@ checksum = "22ec99545bb0ed0ea7bb9b8e1e9122ea386ff8a48c0922e43f36d45ab09e0e80"
 name = "day1"
 version = "0.1.0"
 dependencies = [
- "itertools",
+ "itertools 0.13.0",
  "took",
 ]
 
@@ -46,7 +46,7 @@ name = "day10"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "itertools",
+ "itertools 0.14.0",
  "took",
 ]
 
@@ -54,7 +54,7 @@ dependencies = [
 name = "day11"
 version = "0.1.0"
 dependencies = [
- "itertools",
+ "itertools 0.14.0",
  "took",
 ]
 
@@ -63,7 +63,7 @@ name = "day13"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "itertools",
+ "itertools 0.14.0",
  "nom",
  "once_cell",
  "took",
@@ -123,7 +123,7 @@ name = "day8"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "itertools",
+ "itertools 0.14.0",
  "nom",
  "took",
 ]
@@ -152,25 +152,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "itertools"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "memchr"
 version = "2.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 
 [[package]]
-name = "minimal-lexical"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
-
-[[package]]
 name = "nom"
-version = "7.1.3"
+version = "8.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a"
+checksum = "df9761775871bdef83bee530e60050f7e54b1105350d6884eb0fb4f46c2f9405"
 dependencies = [
  "memchr",
- "minimal-lexical",
 ]
 
 [[package]]

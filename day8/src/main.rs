@@ -5,7 +5,7 @@ use nom::{
     character::complete::{self, line_ending, one_of},
     combinator::{map, value},
     multi::{many1, separated_list1},
-    IResult,
+    IResult, Parser,
 };
 use std::{collections::hash_map::Values, collections::HashMap};
 
@@ -131,22 +131,23 @@ fn parse_input(input: &'static str) -> Result<Grid> {
 }
 
 fn parse(input: &str) -> IResult<&str, Vec<Vec<Option<char>>>> {
-    separated_list1(line_ending, parse_line)(input)
+    separated_list1(line_ending, parse_line).parse(input)
 }
 
 fn parse_line(input: &str) -> IResult<&str, Vec<Option<char>>> {
-    many1(alt((parse_dot, parse_char)))(input)
+    many1(alt((parse_dot, parse_char))).parse(input)
 }
 
 fn parse_char(input: &str) -> IResult<&str, Option<char>> {
     map(
         one_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"),
         Some,
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_dot(input: &str) -> IResult<&str, Option<char>> {
-    value(None, complete::char('.'))(input)
+    value(None, complete::char('.')).parse(input)
 }
 
 #[cfg(test)]

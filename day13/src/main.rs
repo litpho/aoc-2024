@@ -4,8 +4,8 @@ use nom::{
     character::complete::{self, line_ending, one_of},
     combinator::map,
     multi::separated_list1,
-    sequence::{pair, tuple},
-    IResult,
+    sequence::pair,
+    IResult, Parser,
 };
 
 const DATA: &str = include_str!("input.txt");
@@ -102,45 +102,48 @@ fn parse_input(input: &'static str) -> Result<Vec<Machine>> {
 }
 
 fn parse(input: &str) -> IResult<&str, Vec<Machine>> {
-    separated_list1(pair(line_ending, line_ending), parse_machine)(input)
+    separated_list1(pair(line_ending, line_ending), parse_machine).parse(input)
 }
 
 fn parse_machine(input: &str) -> IResult<&str, Machine> {
     map(
-        tuple((
+        (
             parse_button,
             line_ending,
             parse_button,
             line_ending,
             parse_prize,
-        )),
+        ),
         |(button_a, _, button_b, _, prize)| Machine {
             button_a,
             button_b,
             prize,
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_button(input: &str) -> IResult<&str, (usize, usize)> {
     map(
-        tuple((
+        (
             tag("Button "),
             one_of("AB"),
             tag(": X+"),
             complete::u32,
             tag(", Y+"),
             complete::u32,
-        )),
+        ),
         |(_, _, _, x, _, y)| (x as usize, y as usize),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_prize(input: &str) -> IResult<&str, (usize, usize)> {
     map(
-        tuple((tag("Prize: X="), complete::u32, tag(", Y="), complete::u32)),
+        (tag("Prize: X="), complete::u32, tag(", Y="), complete::u32),
         |(_, x, _, y)| (x as usize, y as usize),
-    )(input)
+    )
+    .parse(input)
 }
 
 #[cfg(test)]

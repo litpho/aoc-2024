@@ -1,11 +1,12 @@
 use anyhow::Result;
-use nom::bytes::complete::tag;
-use nom::character::complete;
-use nom::character::complete::line_ending;
-use nom::combinator::map;
-use nom::multi::separated_list1;
-use nom::sequence::{pair, separated_pair};
-use nom::IResult;
+use nom::{
+    bytes::complete::tag,
+    character::complete::{self, line_ending},
+    combinator::map,
+    multi::separated_list1,
+    sequence::{pair, separated_pair},
+    IResult, Parser,
+};
 use std::collections::HashMap;
 
 const DATA: &str = include_str!("input.txt");
@@ -97,7 +98,7 @@ fn parse_input(input: &'static str) -> Result<(Rules, Pages)> {
 }
 
 fn parse(input: &str) -> IResult<&str, (Rules, Pages)> {
-    separated_pair(parse_rules, pair(line_ending, line_ending), parse_pages)(input)
+    separated_pair(parse_rules, pair(line_ending, line_ending), parse_pages).parse(input)
 }
 
 fn parse_rules(input: &str) -> IResult<&str, Rules> {
@@ -107,22 +108,24 @@ fn parse_rules(input: &str) -> IResult<&str, Rules> {
             map.entry(a).or_default().push(b);
         }
         map
-    })(input)
+    })
+    .parse(input)
 }
 
 fn parse_rule(input: &str) -> IResult<&str, (usize, usize)> {
     map(
         separated_pair(complete::u32, tag("|"), complete::u32),
         |(a, b)| (a as usize, b as usize),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_pages(input: &str) -> IResult<&str, Pages> {
-    separated_list1(line_ending, parse_page)(input)
+    separated_list1(line_ending, parse_page).parse(input)
 }
 
 fn parse_page(input: &str) -> IResult<&str, Vec<usize>> {
-    separated_list1(tag(","), map(complete::u32, |a| a as usize))(input)
+    separated_list1(tag(","), map(complete::u32, |a| a as usize)).parse(input)
 }
 
 #[cfg(test)]

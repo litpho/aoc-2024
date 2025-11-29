@@ -4,7 +4,7 @@ use nom::{
     character::complete::{self, line_ending},
     multi::separated_list1,
     sequence::separated_pair,
-    IResult,
+    IResult, Parser,
 };
 
 const DATA: &str = include_str!("input.txt");
@@ -97,7 +97,7 @@ fn parse_input(input: &'static str) -> Result<Vec<(u64, Vec<u64>)>> {
 }
 
 fn parse(input: &str) -> IResult<&str, Vec<(u64, Vec<u64>)>> {
-    separated_list1(line_ending, parse_line)(input)
+    separated_list1(line_ending, parse_line).parse(input)
 }
 
 fn parse_line(input: &str) -> IResult<&str, (u64, Vec<u64>)> {
@@ -105,7 +105,8 @@ fn parse_line(input: &str) -> IResult<&str, (u64, Vec<u64>)> {
         complete::u64,
         tag(": "),
         separated_list1(tag(" "), complete::u64),
-    )(input)
+    )
+    .parse(input)
 }
 
 #[cfg(test)]

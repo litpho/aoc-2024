@@ -5,7 +5,7 @@ use nom::{
     combinator::map,
     multi::{many0, many1, many_till},
     sequence::{delimited, separated_pair, terminated},
-    IResult,
+    IResult, Parser,
 };
 
 const DATA: &str = include_str!("input.txt");
@@ -40,7 +40,7 @@ fn main() {
     let (_, input) = result.unwrap();
 
     let (took, result) = took::took(|| part_two_nom(&input));
-    println!("Result part two: {result}");
+    println!("Result part two nom: {result}");
     println!("Time spent: {took}");
 }
 
@@ -131,22 +131,23 @@ fn part_two_nom(input: &[Instr]) -> u32 {
 }
 
 fn parse_nom(input: &str) -> IResult<&str, Vec<Instr>> {
-    terminated(many1(parse_instr), many0(anychar))(input)
+    terminated(many1(parse_instr), many0(anychar)).parse(input)
 }
 
 fn parse_instr(input: &str) -> IResult<&str, Instr> {
     map(
         many_till(anychar, alt((parse_do, parse_dont, parse_mul))),
         |(_, instr)| instr,
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_do(input: &str) -> IResult<&str, Instr> {
-    map(tag("do()"), |_| Instr::Do)(input)
+    map(tag("do()"), |_| Instr::Do).parse(input)
 }
 
 fn parse_dont(input: &str) -> IResult<&str, Instr> {
-    map(tag("don't()"), |_| Instr::Dont)(input)
+    map(tag("don't()"), |_| Instr::Dont).parse(input)
 }
 
 fn parse_mul(input: &str) -> IResult<&str, Instr> {
@@ -157,7 +158,8 @@ fn parse_mul(input: &str) -> IResult<&str, Instr> {
             tag(")"),
         ),
         |(a, b)| Instr::Mul(Mul { a, b }),
-    )(input)
+    )
+    .parse(input)
 }
 
 #[cfg(test)]
