@@ -113,7 +113,7 @@ impl Grid {
         Self { bounds, map }
     }
 
-    pub fn antennae(&self) -> Values<char, Vec<(usize, usize)>> {
+    pub fn antennae(&self) -> Values<'_, char, Vec<(usize, usize)>> {
         self.map.values()
     }
 

@@ -79,10 +79,10 @@ fn middle(v: &[usize]) -> usize {
 
 fn comparator(input: &Rules) -> impl Fn(&usize, &usize) -> std::cmp::Ordering + use<'_> {
     |a, b| {
-        if input.get(a).map_or(false, |p| p.contains(b)) {
+        if input.get(a).is_some_and(|p| p.contains(b)) {
             return std::cmp::Ordering::Less;
         }
-        if input.get(b).map_or(false, |p| p.contains(a)) {
+        if input.get(b).is_some_and(|p| p.contains(a)) {
             return std::cmp::Ordering::Greater;
         }
 
