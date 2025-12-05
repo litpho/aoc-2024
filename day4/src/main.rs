@@ -154,21 +154,21 @@ mod tests {
 
     #[test]
     fn test_part_one_testdata() {
-        assert_eq!(18, part_one(&parse(TESTDATA)));
+        assert_eq!(part_one(&parse(TESTDATA)), 18);
     }
 
     #[test]
     fn test_part_one() {
-        assert_eq!(2573, part_one(&parse(DATA)));
+        assert_eq!(part_one(&parse(DATA)), 2573);
     }
 
     #[test]
     fn test_part_two_testdata() {
-        assert_eq!(9, part_two(&parse(TESTDATA)));
+        assert_eq!(part_two(&parse(TESTDATA)), 9);
     }
 
     #[test]
     fn test_part_two() {
-        assert_eq!(1850, part_two(&parse(DATA)));
+        assert_eq!(part_two(&parse(DATA)), 1850);
     }
 }

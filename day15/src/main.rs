@@ -216,23 +216,23 @@ mod tests {
     #[test]
     fn test_part_one_testdata_small() -> Result<()> {
         let (map, instructions) = parse_input(TESTDATA_SMALL)?;
-        assert_eq!(2028, part_one(map, &instructions));
+        assert_eq!(part_one(map, &instructions), 2028);
 
         Ok(())
     }
 
     // #[test]
     // fn test_part_one_testdata() {
-    //     assert_eq!(10092, part_one(parse_input(TESTDATA)));
+    //     assert_eq!(part_one(parse_input(TESTDATA)), 10092);
     // }
 
     // #[test]
     // fn test_part_one() {
-    //     assert_eq!(224529, part_one(parse_input(DATA)));
+    //     assert_eq!(part_one(parse_input(DATA)), 224529);
     // }
     //
     // #[test]
     // fn test_part_two() {
-    //     assert_eq!(266820198587914, part_two(parse_input(DATA)));
+    //     assert_eq!(part_two(parse_input(DATA)), 266820198587914);
     // }
 }

@@ -147,26 +147,26 @@ mod tests {
     #[test]
     fn test_part_one_small() {
         let data = "AAAA\nBBCD\nBBCC\nEEEC";
-        assert_eq!(140, part_one(&parse_input(data)));
+        assert_eq!(part_one(&parse_input(data)), 140);
     }
 
     #[test]
     fn test_part_one_testdata() {
-        assert_eq!(1930, part_one(&parse_input(TESTDATA)));
+        assert_eq!(part_one(&parse_input(TESTDATA)), 1930);
     }
 
     // #[test]
     // fn test_part_one() {
-    //     assert_eq!(224529, part_one(parse_input(DATA)));
+    //     assert_eq!(part_one(parse_input(DATA)), 224529);
     // }
     //
     // #[test]
     // fn test_part_two_testdata() {
-    //     assert_eq!(266820198587914, part_two(parse_input(DATA)));
+    //     assert_eq!(part_two(parse_input(DATA)), 266820198587914);
     // }
     //
     // #[test]
     // fn test_part_two() {
-    //     assert_eq!(266820198587914, part_two(parse_input(DATA)));
+    //     assert_eq!(part_two(parse_input(DATA)), 266820198587914);
     // }
 }

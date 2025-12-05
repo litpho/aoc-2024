@@ -57,24 +57,24 @@ mod tests {
     #[test]
     fn test_part_one_testdata() {
         let input = parse(TESTDATA);
-        assert_eq!(11, part_one(input.0, input.1));
+        assert_eq!(part_one(input.0, input.1), 11);
     }
 
     #[test]
     fn test_part_one() {
         let input = parse(DATA);
-        assert_eq!(2742123, part_one(input.0, input.1));
+        assert_eq!(part_one(input.0, input.1), 2742123);
     }
 
     #[test]
     fn test_part_two_testdata() {
         let input = parse(TESTDATA);
-        assert_eq!(31, part_two(input.0, input.1));
+        assert_eq!(part_two(input.0, input.1), 31);
     }
 
     #[test]
     fn test_part_two() {
         let input = parse(DATA);
-        assert_eq!(21328497, part_two(input.0, input.1));
+        assert_eq!(part_two(input.0, input.1), 21328497);
     }
 }

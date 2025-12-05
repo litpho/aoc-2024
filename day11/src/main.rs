@@ -84,16 +84,16 @@ mod tests {
 
     #[test]
     fn test_part_one_testdata() {
-        assert_eq!(55312, part_one(parse_input(TESTDATA)));
+        assert_eq!(part_one(parse_input(TESTDATA)), 55312);
     }
 
     #[test]
     fn test_part_one() {
-        assert_eq!(224529, part_one(parse_input(DATA)));
+        assert_eq!(part_one(parse_input(DATA)), 224529);
     }
 
     #[test]
     fn test_part_two() {
-        assert_eq!(266820198587914, part_two(parse_input(DATA)));
+        assert_eq!(part_two(parse_input(DATA)), 266820198587914);
     }
 }

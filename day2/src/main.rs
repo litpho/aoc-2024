@@ -71,21 +71,21 @@ mod tests {
 
     #[test]
     fn test_part_one_testdata() {
-        assert_eq!(2, part_one(&parse(TESTDATA)));
+        assert_eq!(part_one(&parse(TESTDATA)), 2);
     }
 
     #[test]
     fn test_part_one() {
-        assert_eq!(252, part_one(&parse(DATA)));
+        assert_eq!(part_one(&parse(DATA)), 252);
     }
 
     #[test]
     fn test_part_two_testdata() {
-        assert_eq!(4, part_two(&parse(TESTDATA)));
+        assert_eq!(part_two(&parse(TESTDATA)), 4);
     }
 
     #[test]
     fn test_part_two() {
-        assert_eq!(324, part_two(&parse(DATA)));
+        assert_eq!(part_two(&parse(DATA)), 324);
     }
 }

@@ -171,41 +171,41 @@ mod tests {
 
     #[test]
     fn test_part_one_testdata() {
-        assert_eq!(161, solve(&parse_input(TESTDATA, false)));
+        assert_eq!(solve(&parse_input(TESTDATA, false)), 161);
     }
 
     #[test]
     fn test_part_one() {
-        assert_eq!(170778545, solve(&parse_input(DATA, false)));
+        assert_eq!(solve(&parse_input(DATA, false)), 170778545);
     }
 
     #[test]
     fn test_part_one_testdata_nom() {
-        assert_eq!(161, part_one_nom(&parse_nom(TESTDATA).unwrap().1));
+        assert_eq!(part_one_nom(&parse_nom(TESTDATA).unwrap().1), 161);
     }
 
     #[test]
     fn test_part_one_nom() {
-        assert_eq!(170778545, part_one_nom(&parse_nom(DATA).unwrap().1));
+        assert_eq!(part_one_nom(&parse_nom(DATA).unwrap().1), 170778545);
     }
 
     #[test]
     fn test_part_two_testdata() {
-        assert_eq!(48, solve(&parse_input(TESTDATA2, true)));
+        assert_eq!(solve(&parse_input(TESTDATA2, true)), 48);
     }
 
     #[test]
     fn test_part_two() {
-        assert_eq!(82868252, solve(&parse_input(DATA, true)));
+        assert_eq!(solve(&parse_input(DATA, true)), 82868252);
     }
 
     #[test]
     fn test_part_two_testdata_nom() {
-        assert_eq!(48, part_two_nom(&parse_nom(TESTDATA2).unwrap().1));
+        assert_eq!(part_two_nom(&parse_nom(TESTDATA2).unwrap().1), 48);
     }
 
     #[test]
     fn test_part_two_nom() {
-        assert_eq!(82868252, part_two_nom(&parse_nom(DATA).unwrap().1));
+        assert_eq!(part_two_nom(&parse_nom(DATA).unwrap().1), 82868252);
     }
 }
